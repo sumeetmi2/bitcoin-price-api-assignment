@@ -144,7 +144,7 @@ class BitcoinPriceApi(priceSearchService: IPriceSearchService)
   }
 
   @Path("/getNext15DaysPrediction")
-  @ApiOperation(value = "Get prediction for next 15 days",
+  @ApiOperation(value = "Get prediction for next 15 days. Default period is 10 if you leave value 0",
     httpMethod = "POST")
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Success", response = classOf[Seq[Price]]),
