@@ -97,7 +97,7 @@ class BitcoinPriceApi(priceSearchService: IPriceSearchService)
   }
 
   @Path("/getLastMonthPrices")
-  @ApiOperation(value = "Get Prices For Last Month",
+  @ApiOperation(value = "Getting Prices For Last Month",
     httpMethod = "GET")
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Success", response = classOf[Seq[Price]]),
