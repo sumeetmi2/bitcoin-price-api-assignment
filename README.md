@@ -6,9 +6,10 @@ bitcoin-price-assignment
 ## Setup
 ```
 git clone https://github.com/sumeetmi2/bitcoin-price-api-assignment.git
+cd bitcoin-price-api-assignment
 sbt clean compile
 sbt dist
-cd bitcoin-price-api/target/universal
+cd target/universal
 unzip bitcoin-price-api-0.1.zip 
 chmod u+x bitcoin-price-api-0.1/bin/bitcoin-price-api
 bitcoin-price-api-0.1/bin/bitcoin-price-api com.bitcoin.price.app.PriceApp
