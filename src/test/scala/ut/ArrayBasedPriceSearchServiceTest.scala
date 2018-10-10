@@ -75,7 +75,7 @@ class ArrayBasedPriceSearchServiceTest extends FunSuite with Matchers {
   test("should return bucket wise max price") {
     val prices1 = Seq(Price("900", "2018-10-06T00:00:00"), Price("1000", "2018-10-07T00:00:00"), Price("1200", "2018-10-08T00:00:00"), Price("1100", "2018-10-09T00:00:00"))
     val arrayBasedPriceSearchService2 = new ArrayBasedPriceSearchService(prices1)
-    val start = "2018-10-05T00:00:00"
+    val start = "2018-10-06T00:00:00"
     val end = "2018-10-11T00:00:00"
     val expectResult = Seq(
       BucketWiseMaxPriceResponse(0, "2018-10-07T00:00:00", 1000.0),
