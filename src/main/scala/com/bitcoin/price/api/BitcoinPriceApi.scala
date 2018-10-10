@@ -6,7 +6,7 @@ import javax.ws.rs.Path
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{complete, concat, path, _}
 import akka.http.scaladsl.server._
-import com.bitcoin.price.model.{CustomDateRangeRequest, GetNext15DaysPriceRequest, MovingAverageRequest, MovingAverageResponse}
+import com.bitcoin.price.model._
 import com.bitcoin.price.service.DateTimeDefaults._
 import com.bitcoin.price.service.{IPriceSearchService, Price}
 import com.typesafe.config.Config
@@ -77,6 +77,17 @@ class BitcoinPriceApi(priceSearchService: IPriceSearchService)
         entity(as[GetNext15DaysPriceRequest]) {
           param =>
             complete(getNext15DaysPrediction(param))
+        }
+      },
+      (path("getBucketWiseMaxPriceCustomDateRange") & post & handleRejections(RejectionHandler.default) &
+        handleExceptions(ExceptionHandler {
+          case NonFatal(e) =>
+            logger.error("failed getting max bucket price for custom date range", e)
+            complete(StatusCodes.InternalServerError)
+        })) {
+        entity(as[BucketWiseMaxPriceRequest]) {
+          param =>
+            complete(getBucketWiseMaxPriceForCustomDateRange(param))
         }
       }
     )
@@ -160,4 +171,21 @@ class BitcoinPriceApi(priceSearchService: IPriceSearchService)
     Future.successful(res)
   }
 
+  @Path("/getBucketWiseMaxPriceCustomDateRange")
+  @ApiOperation(value = "Get max price per bucket for date range. date in format yyyy-MM-dd",
+    httpMethod = "POST")
+  @ApiResponses(Array(
+    new ApiResponse(code = 200, message = "Success", response = classOf[Seq[BucketWiseMaxPriceResponse]]),
+    new ApiResponse(code = 400, message = "Malformed request data"),
+    new ApiResponse(code = 403, message = "Unauthorized access"),
+    new ApiResponse(code = 500, message = "Internal server error")
+  ))
+  def getBucketWiseMaxPriceForCustomDateRange(req: BucketWiseMaxPriceRequest): Future[Seq[BucketWiseMaxPriceResponse]] = {
+    val customDateRangeRequest = req.customDateRangeRequest
+    val startDate = LocalDate.parse(customDateRangeRequest.startDate, inputDateTimeFormatter).atStartOfDay()
+    val endDate = LocalDate.parse(customDateRangeRequest.endDate, inputDateTimeFormatter).atStartOfDay()
+    val res = priceSearchService.bucketWiseMaxPriceSearch(dateTimeFormatter.format(startDate),
+      dateTimeFormatter.format(endDate), req.bucket)
+    Future.successful(res)
+  }
 }

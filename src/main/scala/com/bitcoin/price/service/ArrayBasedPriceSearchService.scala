@@ -4,7 +4,7 @@ import java.text.DecimalFormat
 import java.time._
 import java.time.temporal.TemporalAdjusters
 
-import com.bitcoin.price.model.MovingAverageResponse
+import com.bitcoin.price.model.{BucketWiseMaxPriceResponse, MovingAverageResponse}
 import com.bitcoin.price.service.DateTimeDefaults._
 
 import scala.collection.mutable
@@ -119,5 +119,14 @@ class ArrayBasedPriceSearchService(prices: Seq[Price]) extends IPriceSearchServi
     val dateNowStr = dateTimeFormatter.format(dateNow.plusDays(1))
     val next15Days = dateTimeFormatter.format(dateNow.plusDays(15))
     movingAverage(dateNowStr, next15Days, period).map(t => Price(t.value.toString, t.date))
+  }
+
+  override def bucketWiseMaxPriceSearch(start: String, end: String, bucket: Int): Seq[BucketWiseMaxPriceResponse] = {
+    val prices = search(start, end)
+    prices.grouped(bucket).zipWithIndex.map(t => (t._2, t._1)).map {
+      p =>
+        val maxPrice = p._2.maxBy(_.price.toDouble)
+        BucketWiseMaxPriceResponse(p._1, maxPrice.time, maxPrice.price.toDouble)
+    }.toSeq
   }
 }

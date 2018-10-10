@@ -3,7 +3,7 @@ package ut
 import java.time.temporal.TemporalAdjusters
 import java.time.{LocalDate, YearMonth, ZoneId}
 
-import com.bitcoin.price.model.MovingAverageResponse
+import com.bitcoin.price.model.{BucketWiseMaxPriceResponse, MovingAverageResponse}
 import com.bitcoin.price.service.DateTimeDefaults._
 import com.bitcoin.price.service.{ArrayBasedPriceSearchService, Price}
 import org.scalatest.{FunSuite, Matchers}
@@ -69,6 +69,21 @@ class ArrayBasedPriceSearchServiceTest extends FunSuite with Matchers {
 
     val arrayBasedPriceSearchService1 = new ArrayBasedPriceSearchService(inputPrices)
     arrayBasedPriceSearchService1.next15DaysPredict(2) should contain theSameElementsAs outputPredictions
+  }
+
+
+  test("should return bucket wise max price") {
+    val prices1 = Seq(Price("900", "2018-10-06T00:00:00"), Price("1000", "2018-10-07T00:00:00"), Price("1200", "2018-10-08T00:00:00"), Price("1100", "2018-10-09T00:00:00"))
+    val arrayBasedPriceSearchService2 = new ArrayBasedPriceSearchService(prices1)
+    val start = "2018-10-05T00:00:00"
+    val end = "2018-10-11T00:00:00"
+    val expectResult = Seq(
+      BucketWiseMaxPriceResponse(0, "2018-10-07T00:00:00", 1000.0),
+      BucketWiseMaxPriceResponse(1, "2018-10-08T00:00:00", 1200.0)
+    )
+    val result = arrayBasedPriceSearchService2.bucketWiseMaxPriceSearch(start, end, 2)
+
+    result should contain theSameElementsAs expectResult
   }
 
 
